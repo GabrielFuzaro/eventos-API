@@ -40,23 +40,36 @@ public class ParticipanteService {
         Evento evento = crudEventoService.buscarUnicoEvento(input.getEventoId().getId());
         Participante participante = new Participante();
 
-        participante.setEvento(evento);
-
-        if(evento.getStatus() == StatusEvento.LOTADO){
+        if (evento.getStatus() == StatusEvento.LOTADO) {
             throw new NegocioExeption("Esse evento já está lotado!");
         }
 
+        participante.setEvento(evento);
         participante.setNome(input.getNome());
         participante.setEmail(input.getEmail());
-        
-        return participanteRepository.save(participante);
+
+        Participante participanteSalvo = participanteRepository.save(participante);
+
+        long totalInscritos = participanteRepository.countByEventoId(evento.getId());
+
+        if (totalInscritos >= evento.getCapacidade_maxima()) {
+            evento.setStatus(StatusEvento.LOTADO);
+        }
+
+        return participanteSalvo;
     }
 
     @Transactional
     public void excluirParticipante(Long participanteId){
-        if(!participanteRepository.existsById(participanteId)){
-            throw new EntidadeNaoEncontradaException("Participante Não Encontrado!");
-        }
+        Participante participante = participanteRepository.findById(participanteId)
+            .orElseThrow(() -> new EntidadeNaoEncontradaException("Participante Não Encontrado!"));
+
+        Evento evento = participante.getEvento();
+
         participanteRepository.deleteById(participanteId);
+
+        if (evento.getStatus() == StatusEvento.LOTADO) {
+            evento.setStatus(StatusEvento.ABERTO);
+        }
     }
 }

@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.eventos.eventos_api.assembler.EventoAssembler;
+import com.eventos.eventos_api.assembler.ParticipanteAssembler;
 import com.eventos.eventos_api.domain.repository.EventoRepository;
 import com.eventos.eventos_api.domain.service.CrudEventoService;
 import java.util.List;
@@ -24,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.eventos.eventos_api.model.output.EventoOutput;
+import com.eventos.eventos_api.model.output.ParticipanteOutput;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -36,6 +39,7 @@ public class EventoController {
     private CrudEventoService crudEventoService;
     private EventoRepository eventoRepository;
     private EventoAssembler eventoAssembler;
+    private ParticipanteAssembler participanteAssembler;
 
     @GetMapping
     public List<EventoOutput> listarEventos(){
@@ -45,6 +49,11 @@ public class EventoController {
     @GetMapping("/{eventoId}")
     public EventoOutput listarUnicoEvento(@PathVariable Long eventoId){
         return eventoAssembler.toOutput(crudEventoService.buscarUnicoEvento(eventoId));
+    }
+
+    @GetMapping("/{eventoId}/participantes")
+    public List<ParticipanteOutput> listarParticipantesDoEvento(@PathVariable Long eventoId){
+        return participanteAssembler.toCollectorsOutput(crudEventoService.buscarParticipantesDoEvento(eventoId));
     }
 
     @PostMapping

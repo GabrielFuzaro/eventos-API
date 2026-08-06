@@ -1,6 +1,7 @@
 package com.eventos.eventos_api.controller;
 
 import com.eventos.eventos_api.domain.model.Participante;
+import com.eventos.eventos_api.domain.service.CrudEventoService;
 import com.eventos.eventos_api.domain.service.ParticipanteService;
 
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/participantes")
 public class ParticipanteController {
     
+    private CrudEventoService crudEventoService;
     private ParticipanteService participanteService;
     private ParticipanteAssembler participanteAssembler;
 
@@ -43,6 +45,12 @@ public class ParticipanteController {
     public ParticipanteOutput listarParticipantePorId(@PathVariable Long participanteId){
         return participanteAssembler.toOutput(participanteService.listarParticipantePorId(participanteId));
     }
+
+    @GetMapping("/{eventoId}/participantes")
+    public List<ParticipanteOutput> listarParticipantesDoEvento(@PathVariable Long eventoId){
+        return participanteAssembler.toCollectorsOutput(crudEventoService.buscarParticipantesDoEvento(eventoId));
+    }
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
