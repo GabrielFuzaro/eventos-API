@@ -16,5 +16,6 @@ public class EventoInput {
     private String nome;
     private String local;
     private int capacidade_maxima;
+    private OffsetDateTime data_evento;
 
 }

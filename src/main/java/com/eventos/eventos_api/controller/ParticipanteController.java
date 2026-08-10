@@ -46,11 +46,6 @@ public class ParticipanteController {
         return participanteAssembler.toOutput(participanteService.listarParticipantePorId(participanteId));
     }
 
-    @GetMapping("/{eventoId}/participantes")
-    public List<ParticipanteOutput> listarParticipantesDoEvento(@PathVariable Long eventoId){
-        return participanteAssembler.toCollectorsOutput(crudEventoService.buscarParticipantesDoEvento(eventoId));
-    }
-
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

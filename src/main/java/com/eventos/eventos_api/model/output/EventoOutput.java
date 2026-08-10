@@ -23,6 +23,7 @@ public class EventoOutput {
     private Long id;
     private String nome;
     private OffsetDateTime data;
+    private OffsetDateTime data_evento;
     private String local;
     private int capacidade_maxima;
     private StatusEvento status;

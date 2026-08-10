@@ -33,6 +33,9 @@ public class Evento {
     //@NotNull
     private OffsetDateTime data;
 
+    @NotNull
+    private OffsetDateTime data_evento;
+
     @NotBlank
     @Size(max = 30)
     private String local;
