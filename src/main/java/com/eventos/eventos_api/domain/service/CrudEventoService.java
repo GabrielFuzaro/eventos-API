@@ -1,23 +1,12 @@
 package com.eventos.eventos_api.domain.service;
-
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
+import com.eventos.eventos_api.model.input.EventoInput;
 import com.eventos.eventos_api.domain.repository.EventoRepository;
 import com.eventos.eventos_api.domain.repository.ParticipanteRepository;
-import com.eventos.eventos_api.model.output.EventoOutput;
-
-import antlr.debug.Event;
-
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
-
 import javax.transaction.Transactional;
-
 import lombok.AllArgsConstructor;
-
 import com.eventos.eventos_api.domain.exception.EntidadeNaoEncontradaException;
 import com.eventos.eventos_api.domain.exception.NegocioExeption;
 import com.eventos.eventos_api.domain.model.Evento;
@@ -53,17 +42,34 @@ public class CrudEventoService {
     }
 
     @Transactional
-    public Evento cadastrar(Evento evento){
+    public Evento cadastrar(EventoInput input){
+        Evento evento = new Evento();
+
+        evento.setNome(input.getNome());
+        evento.setData_evento(input.getData_evento());
+        evento.setCapacidade_maxima(input.getCapacidade_maxima());
+        evento.setLocal(input.getLocal());
         evento.setStatus(StatusEvento.ABERTO);
         evento.setData(OffsetDateTime.now());
+
+        if(evento.getData_evento().isBefore(OffsetDateTime.now())) {
+            throw new NegocioExeption("Não é permitido cadastrar eventos no passado!");
+        }
+
         return eventoRepository.save(evento);
     }
 
     @Transactional
-    public void atualizar(Long eventoId){
-        if(!eventoRepository.existsById(eventoId)){
-            throw new EntidadeNaoEncontradaException("Evento não encontrado!");
-        }
+    public Evento atualizar(Long eventoId, EventoInput input){
+        Evento evento = eventoRepository.findById(eventoId)
+        .orElseThrow(() -> new EntidadeNaoEncontradaException("Evento não encontrado"));
+
+        evento.setNome(input.getNome());
+        evento.setLocal(input.getLocal());
+        evento.setCapacidade_maxima(input.getCapacidade_maxima());
+        evento.setData_evento(input.getData_evento());
+
+        return eventoRepository.save(evento);
     }
 
     @Transactional

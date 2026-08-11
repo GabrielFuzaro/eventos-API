@@ -1,9 +1,7 @@
 package com.eventos.eventos_api.assembler;
 
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import com.eventos.eventos_api.domain.model.Evento;

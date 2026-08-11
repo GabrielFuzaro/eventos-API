@@ -2,16 +2,12 @@ package com.eventos.eventos_api.assembler;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
-
 import com.eventos.eventos_api.domain.model.Participante;
-import com.eventos.eventos_api.model.output.EventoOutput;
 import com.eventos.eventos_api.model.output.ParticipanteOutput;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.apachecommons.CommonsLog;
 
 @Component
 @AllArgsConstructor

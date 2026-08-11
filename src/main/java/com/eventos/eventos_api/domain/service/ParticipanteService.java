@@ -1,20 +1,15 @@
 package com.eventos.eventos_api.domain.service;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import com.eventos.eventos_api.domain.exception.EntidadeNaoEncontradaException;
 import com.eventos.eventos_api.domain.exception.NegocioExeption;
 import com.eventos.eventos_api.domain.model.Participante;
 import com.eventos.eventos_api.domain.model.StatusEvento;
-
 import java.util.List;
 import com.eventos.eventos_api.domain.model.Evento;
 import javax.transaction.Transactional;
-
 import com.eventos.eventos_api.domain.repository.ParticipanteRepository;
 import com.eventos.eventos_api.model.input.ParticipanteInput;
-
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
