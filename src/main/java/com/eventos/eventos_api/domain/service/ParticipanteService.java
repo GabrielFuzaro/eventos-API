@@ -50,6 +50,9 @@ public class ParticipanteService {
         if (totalInscritos >= evento.getCapacidade_maxima()) {
             evento.setStatus(StatusEvento.LOTADO);
         }
+        if(totalInscritos < evento.getCapacidade_maxima()){
+            evento.setStatus(StatusEvento.ABERTO);
+        }
 
         return participanteSalvo;
     }

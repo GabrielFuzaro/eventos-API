@@ -55,6 +55,14 @@ public class CrudEventoService {
         evento.setLocal(input.getLocal());
         evento.setCapacidade_maxima(input.getCapacidade_maxima());
         evento.setData_evento(input.getData_evento());
+        
+        long quantidadeDeParticipantes = participanteRepository.countByEventoId(eventoId);
+
+        if(quantidadeDeParticipantes >= evento.getCapacidade_maxima()){
+            evento.setStatus(StatusEvento.LOTADO);
+        } else {
+            evento.setStatus(StatusEvento.ABERTO);
+        }
 
         return eventoRepository.save(evento);
     }
