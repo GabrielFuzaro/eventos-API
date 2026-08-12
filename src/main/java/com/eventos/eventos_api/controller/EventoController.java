@@ -41,26 +41,23 @@ public class EventoController {
         return eventoAssembler.toOutput(crudEventoService.buscarUnicoEvento(eventoId));
     }
 
-    @GetMapping("/{eventoId}/participantes")
-    public List<ParticipanteOutput> listarParticipantesDoEvento(@PathVariable Long eventoId){
-        return participanteAssembler.toCollectorsOutput(crudEventoService.buscarParticipantesDoEvento(eventoId));
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Evento cadastrarEvento(@Valid @RequestBody EventoInput evento) {
-        return crudEventoService.cadastrar(evento);
+    public EventoOutput cadastrarEvento(@Valid @RequestBody EventoInput input) {
+    Evento evento = crudEventoService.cadastrar(input);
+    return eventoAssembler.toOutput(evento);
     }
     
     @PutMapping("/{eventoId}")
-    public ResponseEntity<Evento> atualizarEvento(@PathVariable Long eventoId, @Valid @RequestBody EventoInput input) {
+    public ResponseEntity<EventoOutput> atualizarEvento(@PathVariable Long eventoId, @Valid @RequestBody EventoInput input) {
         //TODO: process PUT request
         Evento evento = crudEventoService.atualizar(eventoId, input);
-        return ResponseEntity.ok(evento);
+        return ResponseEntity.ok(eventoAssembler.toOutput(evento));
     }
 
     @DeleteMapping("/{eventoId}")
-    public ResponseEntity<Evento> excluirEvento(@PathVariable Long eventoId){
+    public ResponseEntity<Void> excluirEvento(@PathVariable Long eventoId){
         crudEventoService.excluir(eventoId);
         return ResponseEntity.noContent().build();
     }

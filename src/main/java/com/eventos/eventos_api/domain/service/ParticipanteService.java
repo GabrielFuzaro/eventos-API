@@ -67,4 +67,15 @@ public class ParticipanteService {
             evento.setStatus(StatusEvento.ABERTO);
         }
     }
+
+    @Transactional
+    public List<Participante> buscarParticipantesDoEvento(Long eventoId){
+        List<Participante> participantesDoEvento = participanteRepository.findByEventoId(eventoId);
+
+        if (participantesDoEvento.isEmpty()) {
+            throw new NegocioExeption("Nenhum participante cadastrado nesse Evento!");
+        }
+
+        return participantesDoEvento;
+    }
 }

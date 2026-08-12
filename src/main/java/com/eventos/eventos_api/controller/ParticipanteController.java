@@ -40,15 +40,21 @@ public class ParticipanteController {
         return participanteAssembler.toOutput(participanteService.listarParticipantePorId(participanteId));
     }
 
+    @GetMapping("/evento/{eventoId}")
+    public List<ParticipanteOutput> listarParticipantesDoEvento(@PathVariable Long eventoId){
+        return participanteAssembler.toCollectorsOutput(participanteService.buscarParticipantesDoEvento(eventoId));
+    }
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Participante cadastrarParticipante(@Valid @RequestBody ParticipanteInput input) {
-        return participanteService.cadastrarParticipante(input);
+    public ParticipanteOutput cadastrarParticipante(@Valid @RequestBody ParticipanteInput input) {
+        Participante participante = participanteService.cadastrarParticipante(input);
+        return participanteAssembler.toOutput(participante);
     }
 
     @DeleteMapping("/{participanteId}")
-    public ResponseEntity<Participante> excluirParticipante( @PathVariable Long participanteId){
+    public ResponseEntity<Void> excluirParticipante( @PathVariable Long participanteId){
         participanteService.excluirParticipante(participanteId);
         return ResponseEntity.noContent().build();
     }

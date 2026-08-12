@@ -8,7 +8,6 @@ public class EventosApiApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(EventosApiApplication.class, args);
-		System.out.print("rodou");
 	}
 
 }

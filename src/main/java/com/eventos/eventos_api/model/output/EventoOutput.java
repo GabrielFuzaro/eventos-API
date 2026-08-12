@@ -1,7 +1,6 @@
 package com.eventos.eventos_api.model.output;
 
 import java.time.OffsetDateTime;
-import javax.validation.Valid;
 import com.eventos.eventos_api.domain.model.StatusEvento;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +9,6 @@ import lombok.Setter;
 @Setter
 public class EventoOutput {
     
-    @Valid
     private Long id;
     private String nome;
     private OffsetDateTime data;
