@@ -3,7 +3,6 @@ package com.eventos.eventos_api.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.eventos.eventos_api.assembler.EventoAssembler;
-import com.eventos.eventos_api.assembler.ParticipanteAssembler;
 import com.eventos.eventos_api.domain.service.CrudEventoService;
 import java.util.List;
 import javax.validation.Valid;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import com.eventos.eventos_api.model.input.EventoInput;
 import com.eventos.eventos_api.model.output.EventoOutput;
-import com.eventos.eventos_api.model.output.ParticipanteOutput;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -29,7 +27,6 @@ public class EventoController {
     
     private CrudEventoService crudEventoService;
     private EventoAssembler eventoAssembler;
-    private ParticipanteAssembler participanteAssembler;
 
     @GetMapping
     public List<EventoOutput> listarEventos(){

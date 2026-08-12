@@ -10,7 +10,6 @@ import lombok.AllArgsConstructor;
 import com.eventos.eventos_api.domain.exception.EntidadeNaoEncontradaException;
 import com.eventos.eventos_api.domain.exception.NegocioExeption;
 import com.eventos.eventos_api.domain.model.Evento;
-import com.eventos.eventos_api.domain.model.Participante;
 import com.eventos.eventos_api.domain.model.StatusEvento;
 
 @AllArgsConstructor
@@ -28,9 +27,7 @@ public class CrudEventoService {
         return eventoRepository.findById(eventoId)
         .orElseThrow(() -> new EntidadeNaoEncontradaException("Esse evento não existe!"));
     }
-
-    //Loucura esse metodo aqui mas tenho que estudar ele
-
+    
     @Transactional
     public Evento cadastrar(EventoInput input){
         Evento evento = new Evento();
