@@ -2,6 +2,8 @@ package com.eventos.eventos_api.controller;
 
 import com.eventos.eventos_api.domain.model.Participante;
 import com.eventos.eventos_api.domain.service.ParticipanteService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,9 +32,14 @@ public class ParticipanteController {
     private ParticipanteAssembler participanteAssembler;
 
 
+    //@GetMapping
+    //public List<ParticipanteOutput> listarParticipantes(){
+      //return participanteAssembler.toCollectorsOutput(participanteService.listarParticipantes());
+    //}
+
     @GetMapping
-    public List<ParticipanteOutput> listarParticipantes(){
-        return participanteAssembler.toCollectorsOutput(participanteService.listarParticipantes());
+    public Page<Participante> listarParticipantesPaginacao(Pageable pageable){
+        return participanteService.listarTodosPaginacao(pageable);
     }
 
     @GetMapping("/{participanteId}")
@@ -41,8 +48,8 @@ public class ParticipanteController {
     }
 
     @GetMapping("/evento/{eventoId}")
-    public List<ParticipanteOutput> listarParticipantesDoEvento(@PathVariable Long eventoId){
-        return participanteAssembler.toCollectorsOutput(participanteService.buscarParticipantesDoEvento(eventoId));
+    public Page<ParticipanteOutput> listarParticipantesDoEvento(@PathVariable Long eventoId, Pageable pageable){
+        return participanteAssembler.toCollectorsOutput(participanteService.buscarParticipantesDoEvento(eventoId, pageable));
     }
 
 

@@ -1,8 +1,7 @@
 package com.eventos.eventos_api.assembler;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import com.eventos.eventos_api.domain.model.Participante;
 import com.eventos.eventos_api.model.output.ParticipanteOutput;
@@ -23,9 +22,7 @@ public class ParticipanteAssembler {
         return output;
     }
 
-    public List<ParticipanteOutput> toCollectorsOutput(List<Participante> participantes){
-        return participantes.stream()
-        .map(this::toOutput)
-        .collect(Collectors.toList());
+    public Page<ParticipanteOutput> toCollectorsOutput(Page<Participante> participantes){
+        return participantes.map(this::toOutput);
     }
 }

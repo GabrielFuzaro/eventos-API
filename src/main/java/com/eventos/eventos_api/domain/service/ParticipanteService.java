@@ -1,5 +1,7 @@
 package com.eventos.eventos_api.domain.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.eventos.eventos_api.domain.exception.EntidadeNaoEncontradaException;
 import com.eventos.eventos_api.domain.exception.NegocioExeption;
@@ -22,6 +24,10 @@ public class ParticipanteService {
     @Transactional
     public List<Participante> listarParticipantes(){
         return participanteRepository.findAll();
+    }
+
+    public Page<Participante> listarTodosPaginacao(Pageable pageable){
+        return participanteRepository.findAll(pageable);
     }
 
     @Transactional
@@ -72,8 +78,8 @@ public class ParticipanteService {
     }
 
     @Transactional
-    public List<Participante> buscarParticipantesDoEvento(Long eventoId){
-        List<Participante> participantesDoEvento = participanteRepository.findByEventoId(eventoId);
+    public Page<Participante> buscarParticipantesDoEvento(Long eventoId, Pageable pageable){
+        Page<Participante> participantesDoEvento = participanteRepository.findByEventoId(eventoId, pageable);
 
         if (participantesDoEvento.isEmpty()) {
             throw new NegocioExeption("Nenhum participante cadastrado nesse Evento!");

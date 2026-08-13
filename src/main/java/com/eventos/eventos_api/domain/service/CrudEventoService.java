@@ -30,6 +30,10 @@ public class CrudEventoService {
         return eventoRepository.findById(eventoId)
         .orElseThrow(() -> new EntidadeNaoEncontradaException("Esse evento não existe!"));
     }
+
+    public Page<Evento> listarEventosPaginacao(Pageable pageable) {
+        return eventoRepository.findAll(pageable);
+    }
     
     @Transactional
     public Evento cadastrar(EventoInput input){
@@ -67,6 +71,10 @@ public class CrudEventoService {
             evento.setStatus(StatusEvento.ABERTO);
         }
 
+        if(evento.getData_evento().isBefore(OffsetDateTime.now())) {
+            throw new NegocioExeption("Não é permitido cadastrar eventos no passado!");
+        }
+
         return eventoRepository.save(evento);
     }
 
@@ -85,7 +93,4 @@ public class CrudEventoService {
         eventoRepository.deleteById(eventoId);
     }
 
-    public Page<Evento> listarEventosPaginacao(Pageable pageable) {
-        return eventoRepository.findAll(pageable);
-    }
 }
