@@ -8,6 +8,8 @@ import java.util.List;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import com.eventos.eventos_api.domain.model.Evento;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,14 +30,22 @@ public class EventoController {
     private CrudEventoService crudEventoService;
     private EventoAssembler eventoAssembler;
 
-    @GetMapping
-    public List<EventoOutput> listarEventos(){
-        return eventoAssembler.toCollectionOutput(crudEventoService.buscarTodosEventos());
-    }
+    //List de todos os eventos
+
+    //@GetMapping      
+    //public List<EventoOutput> listarEventos(){
+      //  return eventoAssembler.toCollectionOutput(crudEventoService.buscarTodosEventos());
+    //}
 
     @GetMapping("/{eventoId}")
     public EventoOutput listarUnicoEvento(@PathVariable Long eventoId){
         return eventoAssembler.toOutput(crudEventoService.buscarUnicoEvento(eventoId));
+    }
+
+    //Lista fazendo paginação
+    @GetMapping
+    public Page<Evento> listarEventosPaginacao(Pageable pageable){
+        return crudEventoService.listarEventosPaginacao(pageable);
     }
 
 

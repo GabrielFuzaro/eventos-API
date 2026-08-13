@@ -1,4 +1,7 @@
 package com.eventos.eventos_api.domain.service;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import com.eventos.eventos_api.model.input.EventoInput;
 import com.eventos.eventos_api.domain.repository.EventoRepository;
@@ -80,5 +83,9 @@ public class CrudEventoService {
         }
         
         eventoRepository.deleteById(eventoId);
+    }
+
+    public Page<Evento> listarEventosPaginacao(Pageable pageable) {
+        return eventoRepository.findAll(pageable);
     }
 }
