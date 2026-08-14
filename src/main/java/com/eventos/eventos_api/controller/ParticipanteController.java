@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.eventos.eventos_api.model.output.ParticipanteOutput;
 import com.eventos.eventos_api.assembler.ParticipanteAssembler;
-import java.util.List;
 import com.eventos.eventos_api.model.input.ParticipanteInput;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -38,8 +37,8 @@ public class ParticipanteController {
     //}
 
     @GetMapping
-    public Page<Participante> listarParticipantesPaginacao(Pageable pageable){
-        return participanteService.listarTodosPaginacao(pageable);
+    public Page<ParticipanteOutput> listarParticipantesPaginacao(Pageable pageable){
+        return participanteAssembler.toCollectorsOutput(participanteService.listarTodosPaginacao(pageable));
     }
 
     @GetMapping("/{participanteId}")

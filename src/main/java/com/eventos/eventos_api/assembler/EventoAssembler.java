@@ -1,7 +1,6 @@
 package com.eventos.eventos_api.assembler;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import com.eventos.eventos_api.domain.model.Evento;
@@ -19,9 +18,7 @@ public class EventoAssembler {
         return modelMapper.map(evento, EventoOutput.class);
     }
 
-    public List<EventoOutput> toCollectionOutput(List<Evento> evento){
-        return evento.stream()
-        .map(this::toOutput)
-        .collect(Collectors.toList());
+    public Page<EventoOutput> toCollectionOutput(Page<Evento> evento){
+        return evento.map(this::toOutput);
     }
 }

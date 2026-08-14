@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.eventos.eventos_api.assembler.EventoAssembler;
 import com.eventos.eventos_api.domain.service.CrudEventoService;
-import java.util.List;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import com.eventos.eventos_api.domain.model.Evento;
@@ -44,8 +43,8 @@ public class EventoController {
 
     //Lista fazendo paginação
     @GetMapping
-    public Page<Evento> listarEventosPaginacao(Pageable pageable){
-        return crudEventoService.listarEventosPaginacao(pageable);
+    public Page<EventoOutput> listarEventosPaginacao(Pageable pageable){
+        return eventoAssembler.toCollectionOutput(crudEventoService.listarEventosPaginacao(pageable));
     }
 
 
