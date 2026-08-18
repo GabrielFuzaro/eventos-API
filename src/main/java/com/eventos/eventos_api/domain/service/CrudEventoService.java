@@ -79,6 +79,20 @@ public class CrudEventoService {
     }
 
     @Transactional
+    public Evento encerrar(Long eventoId, EventoInput input){
+        Evento evento = eventoRepository.findById(eventoId)
+        .orElseThrow(() -> new EntidadeNaoEncontradaException("Evento não encontrado"));
+
+        evento.setNome(input.getNome());
+        evento.setLocal(input.getLocal());
+        evento.setCapacidade_maxima(input.getCapacidade_maxima());
+        evento.setData_evento(input.getData_evento());
+        evento.setStatus(StatusEvento.ENCERRADO);
+
+        return eventoRepository.save(evento);
+    }
+
+    @Transactional
     public void excluir(Long eventoId){
         if(!eventoRepository.existsById(eventoId)){
             throw new EntidadeNaoEncontradaException("Evento não encontrado!");

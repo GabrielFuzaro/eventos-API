@@ -62,6 +62,8 @@ public class EventoController {
         return ResponseEntity.ok(eventoAssembler.toOutput(evento));
     }
 
+   
+
     @DeleteMapping("/{eventoId}")
     public ResponseEntity<Void> excluirEvento(@PathVariable Long eventoId){
         crudEventoService.excluir(eventoId);

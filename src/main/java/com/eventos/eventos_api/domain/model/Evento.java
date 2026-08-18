@@ -12,6 +12,9 @@ import javax.validation.constraints.Future;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import com.eventos.eventos_api.domain.exception.NegocioExeption;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,7 +37,6 @@ public class Evento {
     //@NotNull
     private OffsetDateTime data;
 
-    @Future
     @NotNull
     private OffsetDateTime data_evento;
 
@@ -47,4 +49,19 @@ public class Evento {
 
     @Enumerated(EnumType.STRING)
     private StatusEvento status;
+
+
+    public boolean podeSerEncerrado() {
+    return StatusEvento.ABERTO.equals(getStatus());
+}
+
+public void encerrar() {
+
+    if (!podeSerEncerrado()) {
+        throw new NegocioExeption("Evento não pode ser encerrado!");
+    }
+
+    setStatus(StatusEvento.ENCERRADO);
+}
+
 }
