@@ -13,7 +13,7 @@ import lombok.Setter;
 @JsonInclude(Include.NON_NULL)
 @Getter
 @Setter
-public class Problema {
+public class Problema {                           //Cria o corpo de um problema para as exceptions, com a classe Campo embutida
     
     private Integer status;
     private OffsetDateTime dataHora;

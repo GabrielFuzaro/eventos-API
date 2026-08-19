@@ -4,9 +4,9 @@ import java.time.OffsetDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
-public class EventoInput {
+@Getter //Gera os gets
+@Setter //Gera os sets
+public class EventoInput { //declara o formato do input para o evento
     
     private String nome;
     private String local;

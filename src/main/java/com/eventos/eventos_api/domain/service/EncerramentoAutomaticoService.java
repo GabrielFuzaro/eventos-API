@@ -4,36 +4,29 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import com.eventos.eventos_api.domain.model.Evento;
 import com.eventos.eventos_api.domain.repository.EventoRepository;
-import com.eventos.eventos_api.domain.model.StatusEvento;
+
+import lombok.AllArgsConstructor;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@AllArgsConstructor //Gera um constructor com todos os artumentos/Variaveis
+@Service //Declara a classe como um service
 public class EncerramentoAutomaticoService {
 
-    private final EventoRepository eventoRepository;
+    private EventoRepository eventoRepository;
 
-    public EncerramentoAutomaticoService(EventoRepository eventoRepository) {
-        this.eventoRepository = eventoRepository;
-        System.out.println("🔥 EncerramentoAutomaticoService FOI CRIADO!");
-    }
-
-    @Scheduled(fixedRate = 60000)
-    @Transactional
-    public void encerrarEventos() {
-
-        System.out.println("VERIFICANDO EVENTOS...");
+    @Scheduled(fixedRate = 60000) //Agenda uma verificação de alguma condição no tempo que esta no fixedrate
+    @Transactional 
+    public void encerrarEventos() {           //Método para encerrar eventos
 
         List<Evento> eventos = eventoRepository.buscarEventosParaEncerrar(
-            OffsetDateTime.now(),
-            StatusEvento.ABERTO
+            OffsetDateTime.now()                    //Gera uma lista de eventos que podem ser encerrados
         );
 
-        System.out.println("EVENTOS ENCONTRADOS: " + eventos.size());
+        eventos.forEach(Evento::encerrar);  //Executa o método de encerrar para cada evento da lista
 
-        eventos.forEach(Evento::encerrar);
-
-        eventoRepository.saveAll(eventos);
+        eventoRepository.saveAll(eventos);  //Salva os eventos alterados 
     }
 }

@@ -22,9 +22,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 
 
-@RestController
-@AllArgsConstructor
-@RequestMapping("/participantes")
+@RestController //Declara a classe como um Rest Controller
+@AllArgsConstructor //Gera um constructor com todos os argumentos/variaveis
+@RequestMapping("/participantes") //Declara um inicio comum para a URL nas requisições
 public class ParticipanteController {
 
     private ParticipanteService participanteService;
@@ -36,33 +36,33 @@ public class ParticipanteController {
       //return participanteAssembler.toCollectorsOutput(participanteService.listarParticipantes());
     //}
 
-    @GetMapping
+    @GetMapping      //Lista todos os participantes só que com paginação
     public Page<ParticipanteOutput> listarParticipantesPaginacao(Pageable pageable){
-        return participanteAssembler.toCollectorsOutput(participanteService.listarTodosPaginacao(pageable));
+        return participanteAssembler.toCollectorsOutput(participanteService.listarTodosPaginacao(pageable)); //Transforma o corpo de cada participante em um corpo de Output 
     }
 
-    @GetMapping("/{participanteId}")
-    public ParticipanteOutput listarParticipantePorId(@PathVariable Long participanteId){
-        return participanteAssembler.toOutput(participanteService.listarParticipantePorId(participanteId));
+    @GetMapping("/{participanteId}") //Busca apenas um participante pelo id
+    public ParticipanteOutput listarParticipantePorId(@PathVariable Long participanteId){ //PathVariable declara que a respectiva variavel é a que altera a URL
+        return participanteAssembler.toOutput(participanteService.listarParticipantePorId(participanteId)); //Transforma o corpo do participante no corpo de output
     }
 
-    @GetMapping("/evento/{eventoId}")
-    public Page<ParticipanteOutput> listarParticipantesDoEvento(@PathVariable Long eventoId, Pageable pageable){
-        return participanteAssembler.toCollectorsOutput(participanteService.buscarParticipantesDoEvento(eventoId, pageable));
+    @GetMapping("/evento/{eventoId}") //Método para listar participantes de um respectivo evento só que com paginação
+    public Page<ParticipanteOutput> listarParticipantesDoEvento(@PathVariable Long eventoId, Pageable pageable){ //PathVariable declara que a respectiva variavel é a que altera a URL
+        return participanteAssembler.toCollectorsOutput(participanteService.buscarParticipantesDoEvento(eventoId, pageable)); //Transforma o corpo de cada participante para o formato de output
     }
 
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ParticipanteOutput cadastrarParticipante(@Valid @RequestBody ParticipanteInput input) {
-        Participante participante = participanteService.cadastrarParticipante(input);
-        return participanteAssembler.toOutput(participante);
+    @PostMapping //Método para cadastrar participante
+    @ResponseStatus(HttpStatus.CREATED) //Retorna um http de status 201 na resposta
+    public ParticipanteOutput cadastrarParticipante(@Valid @RequestBody ParticipanteInput input) { //Valid faz as validações das condições na entity, RequestBody pega o molde do corpo da requisição
+        Participante participante = participanteService.cadastrarParticipante(input); //Cadastra o participante
+        return participanteAssembler.toOutput(participante); //Transforma o corpo de participante para o formato de output
     }
 
-    @DeleteMapping("/{participanteId}")
-    public ResponseEntity<Void> excluirParticipante( @PathVariable Long participanteId){
-        participanteService.excluirParticipante(participanteId);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/{participanteId}") //Método para excluir participante 
+    public ResponseEntity<Void> excluirParticipante( @PathVariable Long participanteId){ //PathVariable declara que a respectiva variavel é a que altera a URL
+        participanteService.excluirParticipante(participanteId); //Exclui o participante
+        return ResponseEntity.noContent().build(); //Retorna uma resposta vazia de metodo http 204
     }
     
     

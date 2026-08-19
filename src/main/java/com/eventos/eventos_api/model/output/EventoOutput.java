@@ -5,9 +5,9 @@ import com.eventos.eventos_api.domain.model.StatusEvento;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
-public class EventoOutput {
+@Getter //Gera os gets
+@Setter //Gera os sets
+public class EventoOutput {            //Declara o formato do corpo da saída de um evento
     
     private Long id;
     private String nome;
