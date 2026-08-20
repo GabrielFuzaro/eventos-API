@@ -26,6 +26,14 @@ public class CrudEventoService {
         return eventoRepository.findAll();
     }
 
+    public Page<Evento> buscarEventosStatus(StatusEvento status, Pageable pageable){
+        if(!eventoRepository.existsByStatus(status)){
+            throw new EntidadeNaoEncontradaException("esse status não existe!");
+        }
+
+        return eventoRepository.findByStatus(status, pageable);
+    }
+
     public Evento buscarUnicoEvento(Long eventoId){  //Busca apenas um evento através do id
         return eventoRepository.findById(eventoId)
         .orElseThrow(() -> new EntidadeNaoEncontradaException("Esse evento não existe!"));

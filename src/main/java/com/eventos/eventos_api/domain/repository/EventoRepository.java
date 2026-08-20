@@ -2,6 +2,10 @@ package com.eventos.eventos_api.domain.repository;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import com.eventos.eventos_api.domain.model.StatusEvento;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +20,9 @@ public interface EventoRepository extends JpaRepository<Evento, Long>{ //o JPA f
     List<Evento> buscarEventosParaEncerrar(   //Busca para verificar quais eventos devem ser encerrados
         @Param("agora") OffsetDateTime agora
     );
+
+    Page<Evento> findByStatus(StatusEvento status, Pageable pageable);
+    boolean existsByStatus(StatusEvento status);
 
 
 }

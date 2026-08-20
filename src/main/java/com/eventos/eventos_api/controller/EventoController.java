@@ -7,6 +7,8 @@ import com.eventos.eventos_api.domain.service.CrudEventoService;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import com.eventos.eventos_api.domain.model.Evento;
+import com.eventos.eventos_api.domain.model.StatusEvento;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -46,6 +48,11 @@ public class EventoController {
         return eventoAssembler.toCollectionOutput(crudEventoService.listarEventosPaginacao(pageable)); //Pega todos os eventos da lista e muda para o formato de Output
     }
 
+    @GetMapping("/filtro/{statusEvento}")
+    public Page<EventoOutput> listarEventosStatus(Pageable pageable, @PathVariable StatusEvento statusEvento){
+        return eventoAssembler.toCollectionOutput(crudEventoService.buscarEventosStatus(statusEvento, pageable));
+    }
+
 
     @PostMapping //Método para cadastrar evento
     @ResponseStatus(HttpStatus.CREATED)       //Declara a resposta com o status 201 de HTTP  
@@ -60,7 +67,6 @@ public class EventoController {
         return ResponseEntity.ok(eventoAssembler.toOutput(evento)); //Manda o formato do evento para Output para a saída
     }
 
-   
 
     @DeleteMapping("/{eventoId}") //Método para exclusão de um evento
     public ResponseEntity<Void> excluirEvento(@PathVariable Long eventoId){ //PathVariable declara que a respectiva variavel é a que altera a URL
