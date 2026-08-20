@@ -45,6 +45,10 @@ public class ParticipanteService {
             throw new NegocioExeption("Esse evento já está lotado!"); //Verifica se o evento já está lotado para nao receber mais participantes
         }
 
+        if(participanteRepository.existsByEmailAndEventoId(input.getEmail(), evento.getId())){
+            throw new NegocioExeption("Esse email já está inscrito nesse evento!");
+        }
+
         participante.setEvento(evento); //Passa o evento para o participante
         participante.setNome(input.getNome()); //registra o nome do participante através do input
         participante.setEmail(input.getEmail()); //registra o email do particiipante atravéd do input
