@@ -11,7 +11,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import com.eventos.eventos_api.domain.exception.EntidadeNaoEncontradaException;
-import com.eventos.eventos_api.domain.exception.NegocioExeption;
+import com.eventos.eventos_api.domain.exception.NegocioException;
 import com.eventos.eventos_api.domain.model.Evento;
 import com.eventos.eventos_api.domain.model.StatusEvento;
 
@@ -47,7 +47,7 @@ public class CrudEventoService {
         evento.setData(OffsetDateTime.now());
 
         if(evento.getData_evento().isBefore(OffsetDateTime.now())) {
-            throw new NegocioExeption("Não é permitido cadastrar eventos no passado!"); //Proíbe cadastro de datas de eventos no passado
+            throw new NegocioException("Não é permitido cadastrar eventos no passado!"); //Proíbe cadastro de datas de eventos no passado
         }
 
         return eventoRepository.save(evento);
@@ -72,7 +72,7 @@ public class CrudEventoService {
         }
 
         if(evento.getData_evento().isBefore(OffsetDateTime.now())) {
-            throw new NegocioExeption("Não é permitido salvar um evento com data no passado!"); //Pro[ibe eventos no passado
+            throw new NegocioException("Não é permitido salvar um evento com data no passado!"); //Pro[ibe eventos no passado
         }
 
         return eventoRepository.save(evento); //Salva o resultado no banco
@@ -88,7 +88,7 @@ public class CrudEventoService {
         long totalParticipantes = participanteRepository.countByEventoId(eventoId); //Conta os participantes que o respectivo evento possui
 
         if (totalParticipantes > 0) {
-            throw new NegocioExeption("Não é possível excluir um evento que já possui participantes inscritos."); //Se tiver participantes cadastrados no evento, lança uma exception para nao permitir a exclusão
+            throw new NegocioException("Não é possível excluir um evento que já possui participantes inscritos."); //Se tiver participantes cadastrados no evento, lança uma exception para nao permitir a exclusão
         }
         
         eventoRepository.deleteById(eventoId); // Manda a requisição de delete

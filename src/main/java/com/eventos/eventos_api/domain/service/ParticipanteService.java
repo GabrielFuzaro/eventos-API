@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.eventos.eventos_api.domain.exception.EntidadeNaoEncontradaException;
-import com.eventos.eventos_api.domain.exception.NegocioExeption;
+import com.eventos.eventos_api.domain.exception.NegocioException;
 import com.eventos.eventos_api.domain.model.Participante;
 import com.eventos.eventos_api.domain.model.StatusEvento;
 import java.util.List;
@@ -42,11 +42,11 @@ public class ParticipanteService {
         Participante participante = new Participante(); //Cria um participante novo com tudo vazio
 
         if (evento.getStatus() == StatusEvento.LOTADO) {
-            throw new NegocioExeption("Esse evento já está lotado!"); //Verifica se o evento já está lotado para nao receber mais participantes
+            throw new NegocioException("Esse evento já está lotado!"); //Verifica se o evento já está lotado para nao receber mais participantes
         }
 
         if(participanteRepository.existsByEmailAndEventoId(input.getEmail(), evento.getId())){
-            throw new NegocioExeption("Esse email já está inscrito nesse evento!");
+            throw new NegocioException("Esse email já está inscrito nesse evento!");
         }
 
         participante.setEvento(evento); //Passa o evento para o participante
