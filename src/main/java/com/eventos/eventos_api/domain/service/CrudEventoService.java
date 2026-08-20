@@ -72,25 +72,12 @@ public class CrudEventoService {
         }
 
         if(evento.getData_evento().isBefore(OffsetDateTime.now())) {
-            throw new NegocioExeption("Não é permitido cadastrar eventos no passado!"); //Pro[ibe eventos no passado
+            throw new NegocioExeption("Não é permitido salvar um evento com data no passado!"); //Pro[ibe eventos no passado
         }
 
         return eventoRepository.save(evento); //Salva o resultado no banco
     }
 
-    @Transactional
-    public Evento encerrar(Long eventoId, EventoInput input){           //Método para encerrar evento
-        Evento evento = eventoRepository.findById(eventoId)
-        .orElseThrow(() -> new EntidadeNaoEncontradaException("Evento não encontrado")); //Joga exception se o evento nao existe
-
-        evento.setNome(input.getNome());
-        evento.setLocal(input.getLocal());
-        evento.setCapacidade_maxima(input.getCapacidade_maxima());     //Seta as coisas do evento de acordo com o input
-        evento.setData_evento(input.getData_evento());
-        evento.setStatus(StatusEvento.ENCERRADO);
-
-        return eventoRepository.save(evento); //Salva o resultado no banco
-    }
 
     @Transactional
     public void excluir(Long eventoId){                              //Método para excluir um evento

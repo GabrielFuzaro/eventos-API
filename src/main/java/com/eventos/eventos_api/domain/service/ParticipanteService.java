@@ -81,10 +81,6 @@ public class ParticipanteService {
     public Page<Participante> buscarParticipantesDoEvento(Long eventoId, Pageable pageable){ //Lista os participantes do evento com paginação
         Page<Participante> participantesDoEvento = participanteRepository.findByEventoId(eventoId, pageable);
 
-        if (participantesDoEvento.isEmpty()) {
-            throw new NegocioExeption("Nenhum participante cadastrado nesse Evento!"); //Lanca exception caso nao haja nenhum participante cadastrado no evento
-        }
-
         return participantesDoEvento;
     }
 }
