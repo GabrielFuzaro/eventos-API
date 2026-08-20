@@ -11,7 +11,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.eventos.eventos_api.domain.exception.NegocioExeption;
+import com.eventos.eventos_api.domain.exception.NegocioException;
 
 import lombok.EqualsAndHashCode; 
 import lombok.Getter;
@@ -56,7 +56,7 @@ public class Evento {
     public void encerrar() {              //Método para encerrar evento
 
         if (!podeSerEncerrado()) {
-            throw new NegocioExeption("Evento não pode ser encerrado!");
+            throw new NegocioException("Evento não pode ser encerrado!");
         }
 
         setStatus(StatusEvento.ENCERRADO);
