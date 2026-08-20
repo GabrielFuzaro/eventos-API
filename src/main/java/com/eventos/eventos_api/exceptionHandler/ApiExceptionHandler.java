@@ -18,7 +18,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.eventos.eventos_api.domain.exception.EntidadeNaoEncontradaException;
-import com.eventos.eventos_api.domain.exception.NegocioExeption;
+import com.eventos.eventos_api.domain.exception.NegocioException;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -60,8 +60,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{  //Só 
     return handleExceptionInternal(ex, problema, new HttpHeaders(), status, request);
     }
 
-    @ExceptionHandler(NegocioExeption.class)
-    public ResponseEntity<Object> handleNegocioException(NegocioExeption ex, WebRequest request){
+    @ExceptionHandler(NegocioException.class)
+    public ResponseEntity<Object> handleNegocioException(NegocioException ex, WebRequest request){
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
         Problema problema = new Problema();
