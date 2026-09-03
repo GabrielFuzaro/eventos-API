@@ -1,11 +1,14 @@
 package com.eventos.eventos_api.config.security;
 
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Date;
 
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Service
 public class TokenService {
@@ -17,6 +20,8 @@ public class TokenService {
     
     private final String SECRET = "chave-secreta-bem-longa-e-dificil-de-adivinhar-12345";
 
+    private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+
     public String gerarToken(String username) {
         long agora = System.currentTimeMillis();
         long umaHoraEmMillis = 1000* 60 * 60;
@@ -25,13 +30,14 @@ public class TokenService {
         .setSubject(username)
         .setIssuedAt(new Date(agora))
         .setExpiration(new Date(agora + umaHoraEmMillis))
-        .signWith(SignatureAlgorithm.HS256, SECRET)
+        .signWith(key, SignatureAlgorithm.HS256)
         .compact();
     }
 
       public String extrairUsername(String token) {
-        return Jwts.parser()
-            .setSigningKey(SECRET)
+        return Jwts.parserBuilder()
+            .setSigningKey(key)
+            .build()
             .parseClaimsJws(token)
             .getBody()
             .getSubject();
@@ -39,7 +45,7 @@ public class TokenService {
 
     public boolean tokenValido(String token) {
         try {
-            Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (Exception e) {
             // qualquer exceção aqui (token expirado, assinatura inválida, formato errado)
