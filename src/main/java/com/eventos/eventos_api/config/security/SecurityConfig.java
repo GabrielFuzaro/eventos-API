@@ -44,6 +44,8 @@ public class SecurityConfig {
                 // Criar, editar e excluir evento exige estar autenticado
                 .antMatchers(HttpMethod.POST, "/eventos/**").authenticated()
                 .antMatchers(HttpMethod.PUT, "/eventos/**").authenticated()
+                .antMatchers(HttpMethod.POST, "/participantes/**").authenticated()
+                .antMatchers(HttpMethod.DELETE, "/participantes/**").hasRole("ADMIN")
                 .antMatchers(HttpMethod.DELETE, "/eventos/**").hasRole("ADMIN")
                 // O endpoint de login precisa ficar público (senão ninguém consegue logar)
                 .antMatchers("/auth/**").permitAll()

@@ -18,20 +18,21 @@ public class TokenService {
     // carregada de forma segura. Aqui está direto no código só pra fins didáticos.
     // Precisa ter pelo menos 32 caracteres (256 bits) para o algoritmo HS256.
     
-    private final String SECRET = "chave-secreta-bem-longa-e-dificil-de-adivinhar-12345";
+    private final String SECRET = "chave-secreta-bem-longa-e-dificil-de-adivinhar-12345"; //Tem que mudar essa pouca vergonha aqui
 
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
 
-    public String gerarToken(String username) {
+    public String gerarToken(String username, String role) {
         long agora = System.currentTimeMillis();
         long umaHoraEmMillis = 1000* 60 * 60;
 
         return Jwts.builder()
-        .setSubject(username)
-        .setIssuedAt(new Date(agora))
-        .setExpiration(new Date(agora + umaHoraEmMillis))
-        .signWith(key, SignatureAlgorithm.HS256)
-        .compact();
+            .setSubject(username)
+            .claim("role", role)
+            .setIssuedAt(new Date(agora))
+            .setExpiration(new Date(agora + umaHoraEmMillis))
+            .signWith(key, SignatureAlgorithm.HS256)
+            .compact();
     }
 
       public String extrairUsername(String token) {
