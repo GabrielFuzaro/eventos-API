@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Jwts;
@@ -13,14 +14,15 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class TokenService {
     
-    // Em produção, essa chave NUNCA deve ficar hardcoded no código —
-    // deve vir de uma variável de ambiente ou do application.properties,
-    // carregada de forma segura. Aqui está direto no código só pra fins didáticos.
-    // Precisa ter pelo menos 32 caracteres (256 bits) para o algoritmo HS256.
     
-    private final String SECRET = "chave-secreta-bem-longa-e-dificil-de-adivinhar-12345"; //Tem que mudar essa pouca vergonha aqui
+    private final String secret;
+    private final Key key; 
 
-    private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+    public TokenService(@Value("${jwt.secret}") String secret){
+        this.secret = secret;
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
+
 
     public String gerarToken(String username, String role) {
         long agora = System.currentTimeMillis();

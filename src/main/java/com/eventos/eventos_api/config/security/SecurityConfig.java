@@ -43,7 +43,7 @@ public class SecurityConfig {
 
                 // Criar, editar e excluir evento exige estar autenticado
                 .antMatchers(HttpMethod.POST, "/eventos/**").authenticated()
-                .antMatchers(HttpMethod.PUT, "/eventos/**").authenticated()
+                .antMatchers(HttpMethod.PUT, "/eventos/**").hasRole("ADMIN")
                 .antMatchers(HttpMethod.POST, "/participantes/**").authenticated()
                 .antMatchers(HttpMethod.DELETE, "/participantes/**").hasRole("ADMIN")
                 .antMatchers(HttpMethod.DELETE, "/eventos/**").hasRole("ADMIN")
@@ -52,7 +52,7 @@ public class SecurityConfig {
 
                 // Qualquer outra rota não listada acima: por padrão, deixamos pública
                 // (você pode trocar para .authenticated() se preferir bloquear tudo que não foi listado)
-                .anyRequest().permitAll()
+                .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             // Ativa autenticação via usuário/senha no header (Basic Auth) — usado só na Parte 4,
