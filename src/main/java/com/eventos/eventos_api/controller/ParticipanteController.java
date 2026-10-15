@@ -4,16 +4,21 @@ import com.eventos.eventos_api.domain.model.Participante;
 import com.eventos.eventos_api.domain.service.ParticipanteService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.eventos.eventos_api.model.output.ParticipanteOutput;
 import com.eventos.eventos_api.assembler.ParticipanteAssembler;
 import com.eventos.eventos_api.model.input.ParticipanteInput;
+
+import javax.print.attribute.standard.Media;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -65,5 +70,14 @@ public class ParticipanteController {
         return ResponseEntity.noContent().build(); //Retorna uma resposta vazia de metodo http 204
     }
     
+    @GetMapping ("/excel")
+    public ResponseEntity<byte[]> baixarExcel(@RequestParam Long eventoId) {
+        byte[] arquivo = participanteService.gerarExcel(participanteService.listarPorEvento(eventoId));
+
+        return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=participantes.xlsx")
+        .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+        .body(arquivo);
+    }
     
 }
