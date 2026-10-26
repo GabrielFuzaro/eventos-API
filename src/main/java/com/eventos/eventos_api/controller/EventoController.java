@@ -4,12 +4,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.eventos.eventos_api.assembler.EventoAssembler;
 import com.eventos.eventos_api.domain.service.CrudEventoService;
+
+import java.time.OffsetDateTime;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import com.eventos.eventos_api.domain.model.Evento;
 import com.eventos.eventos_api.domain.model.StatusEvento;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.apache.poi.ss.formula.functions.Offset;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +27,8 @@ import com.eventos.eventos_api.model.output.EventoOutput;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController //Declara a classe como um Rest Controller
 @AllArgsConstructor //Gera um constructor com todos os argumentos/variaveis
@@ -53,6 +60,20 @@ public class EventoController {
         return eventoAssembler.toCollectionOutput(crudEventoService.buscarEventosStatus(statusEvento, pageable));
     }
 
+    @GetMapping("/periodo")
+    public List<EventoOutput> buscarPeriodo(
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dataInicial,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dataFinal) {
+
+        return eventoAssembler.toCollectionOutput(
+            crudEventoService.buscarPeriodo(dataInicial, dataFinal));
+    }
+
+    @GetMapping("status")
+    public int contarStatus(@RequestParam StatusEvento status) {
+        return crudEventoService.contarStatus(status);
+    }
+    
 
     @PostMapping //Método para cadastrar evento
     @ResponseStatus(HttpStatus.CREATED)       //Declara a resposta com o status 201 de HTTP  

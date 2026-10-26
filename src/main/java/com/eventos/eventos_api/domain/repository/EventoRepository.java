@@ -1,9 +1,11 @@
 package com.eventos.eventos_api.domain.repository;
 
+import java.sql.Date;
 import java.time.OffsetDateTime;
 import java.util.List;
 import com.eventos.eventos_api.domain.model.StatusEvento;
 
+import org.apache.poi.ss.formula.functions.Offset;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,6 +25,21 @@ public interface EventoRepository extends JpaRepository<Evento, Long>{ //o JPA f
 
     Page<Evento> findByStatus(StatusEvento status, Pageable pageable);
     boolean existsByStatus(StatusEvento status);
+
+    @Query ("Select e from Evento e " + 
+        "where e .data_evento >= :dataInicial " +
+        "and e.data_evento <= :dataFinal " + 
+        "order by e.data_evento")
+
+    List<Evento> buscarEventosPeriodo(
+        @Param("dataInicial") OffsetDateTime dataInicial,
+        @Param ("dataFinal") OffsetDateTime dataFinal
+    );
+
+    @Query ("SELECT count(e) from Evento e " +
+        "Where e.status = :status"
+    )
+    int contarPorStatus(@Param ("status") StatusEvento status);
 
 
 }

@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.eventos.eventos_api.assembler.UsuarioAssembler;
 import com.eventos.eventos_api.domain.exception.NegocioException;
 import com.eventos.eventos_api.domain.model.Usuario;
 import com.eventos.eventos_api.domain.repository.UsuarioRepository;
+import com.eventos.eventos_api.model.output.UsuarioOutput;
 
 @RestController
 @RequestMapping("/auth")
@@ -30,6 +32,9 @@ public class AuthController {
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired 
+    private UsuarioAssembler usuarioAssembler;
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequest request) {
@@ -51,18 +56,20 @@ public class AuthController {
         return ResponseEntity.ok(token);
     }
 
-    @PostMapping("/cadastro")
-    public Usuario cadastro(@RequestBody CadastroRequest request) {
+     @PostMapping("/cadastro")
+    public UsuarioOutput cadastro(@RequestBody CadastroRequest request) {
 
-       if(usuarioRepository.existsByUsername(request.getUsername())){
-        throw new NegocioException("Já existe um usuário com esse nome");
-       }
+        if (usuarioRepository.existsByUsername(request.getUsername())) {
+            throw new NegocioException("Já existe um usuário com esse nome");
+        }
 
-       Usuario usuario = new Usuario();
-       usuario.setUsername(request.getUsername());
-       usuario.setSenha(passwordEncoder.encode(request.getSenha()));
-       usuario.setRole("USER");
+        Usuario usuario = new Usuario();
+        usuario.setUsername(request.getUsername());
+        usuario.setSenha(passwordEncoder.encode(request.getSenha()));
+        usuario.setRole("USER");
 
-       return usuarioRepository.save(usuario);
+        Usuario salvo = usuarioRepository.save(usuario);
+
+        return usuarioAssembler.toOutput(salvo);
     }
 }

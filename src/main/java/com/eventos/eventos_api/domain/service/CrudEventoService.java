@@ -1,9 +1,11 @@
 package com.eventos.eventos_api.domain.service;
 
+import com.eventos.eventos_api.assembler.EventoAssembler;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import com.eventos.eventos_api.model.input.EventoInput;
+import com.eventos.eventos_api.model.output.EventoOutput;
 import com.eventos.eventos_api.domain.repository.EventoRepository;
 import com.eventos.eventos_api.domain.repository.ParticipanteRepository;
 import java.time.OffsetDateTime;
@@ -19,6 +21,7 @@ import com.eventos.eventos_api.domain.model.StatusEvento;
 @Service //Declara classe como um service
 public class CrudEventoService {
     
+    private EventoAssembler eventoAssembler;
     private EventoRepository eventoRepository;
     private ParticipanteRepository participanteRepository;
 
@@ -102,4 +105,17 @@ public class CrudEventoService {
         eventoRepository.deleteById(eventoId); // Manda a requisição de delete
     }
 
+
+    @Transactional
+    public List<Evento> buscarPeriodo(OffsetDateTime dataInicial, OffsetDateTime dataFinal) {
+        if (dataInicial.isAfter(dataFinal)) {
+            throw new NegocioException("A data inicial não pode ser depois da data final!");
+        }
+        return eventoRepository.buscarEventosPeriodo(dataInicial, dataFinal);
+    }
+
+    @Transactional 
+    public int contarStatus(StatusEvento status){
+        return eventoRepository.contarPorStatus(status);
+    }
 }

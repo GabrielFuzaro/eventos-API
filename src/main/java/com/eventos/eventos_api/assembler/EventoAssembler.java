@@ -5,6 +5,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import com.eventos.eventos_api.domain.model.Evento;
 import com.eventos.eventos_api.model.output.EventoOutput;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 
@@ -20,5 +22,11 @@ public class EventoAssembler {
 
     public Page<EventoOutput> toCollectionOutput(Page<Evento> evento){ //Recebe uma lista de eventos e transforma cada um no formato do output
         return evento.map(this::toOutput);
+    }
+
+    public List<EventoOutput> toCollectionOutput(List<Evento> evento){
+        return evento.stream()
+        .map(this::toOutput)
+        .collect(Collectors.toList());
     }
 }
