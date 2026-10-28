@@ -61,6 +61,12 @@ public class ParticipanteService {
     }
 
     @Transactional
+    public Long contarParticipantesEvento(Long eventoId) {
+        crudEventoService.buscarUnicoEvento(eventoId); // 404 se o evento não existir
+        return participanteRepository.countByEventoId(eventoId);
+    }
+
+    @Transactional
     public Participante cadastrarParticipante(ParticipanteInput input){   //Registra um participante através do input de participante
         Evento evento = crudEventoService.buscarUnicoEvento(input.getEventoId().getId());  //Busca o evento que o participante será cadastrado
         Participante participante = new Participante(); //Cria um participante novo com tudo vazio

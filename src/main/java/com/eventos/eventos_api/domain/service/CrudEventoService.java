@@ -1,6 +1,8 @@
 package com.eventos.eventos_api.domain.service;
 
 import com.eventos.eventos_api.assembler.EventoAssembler;
+import com.eventos.eventos_api.domain.model.Categoria;
+import com.eventos.eventos_api.domain.repository.CategoriaRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,8 @@ public class CrudEventoService {
     
     private EventoAssembler eventoAssembler;
     private EventoRepository eventoRepository;
+    private CategoriaService categoriaService;
+    private CategoriaRepository categoriaRepository;
     private ParticipanteRepository participanteRepository;
 
     public List<Evento> buscarTodosEventos(){ //Busca todos os eventos
@@ -49,6 +53,7 @@ public class CrudEventoService {
     @Transactional
     public Evento cadastrar(EventoInput input){       //Cadastra um evento através de um Input de evento
         Evento evento = new Evento();
+        Categoria categoria = categoriaService.buscarUnicaCategoria(input.getCategoriaId());
 
         evento.setNome(input.getNome());
         evento.setData_evento(input.getData_evento());
@@ -56,6 +61,7 @@ public class CrudEventoService {
         evento.setLocal(input.getLocal());
         evento.setStatus(StatusEvento.ABERTO);
         evento.setData(OffsetDateTime.now());
+        evento.setCategoria(categoria);
 
         if(evento.getData_evento().isBefore(OffsetDateTime.now())) {
             throw new NegocioException("Não é permitido cadastrar eventos no passado!"); //Proíbe cadastro de datas de eventos no passado
@@ -69,11 +75,14 @@ public class CrudEventoService {
         Evento evento = eventoRepository.findById(eventoId)
         .orElseThrow(() -> new EntidadeNaoEncontradaException("Evento não encontrado")); //Joga excessão caso o evento nao exista
 
+        Categoria categoria = categoriaService.buscarUnicaCategoria(input.getCategoriaId());
+
         evento.setNome(input.getNome());
         evento.setLocal(input.getLocal());
         evento.setCapacidade_maxima(input.getCapacidade_maxima()); //Seta as coisas do evento de acordo com o que foi inserido no input
         evento.setData_evento(input.getData_evento());
-        
+        evento.setCategoria(categoria);
+
         long quantidadeDeParticipantes = participanteRepository.countByEventoId(eventoId); //Conta quantos participantes tem nesse respectivo evento
 
         if(quantidadeDeParticipantes >= evento.getCapacidade_maxima()){

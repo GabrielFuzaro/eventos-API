@@ -1,6 +1,8 @@
 package com.eventos.eventos_api.model.input;
 
 import java.time.OffsetDateTime;
+
+import com.eventos.eventos_api.domain.model.Categoria;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,5 +14,6 @@ public class EventoInput { //declara o formato do input para o evento
     private String local;
     private int capacidade_maxima;
     private OffsetDateTime data_evento;
+    private Long categoriaId;
 
 }

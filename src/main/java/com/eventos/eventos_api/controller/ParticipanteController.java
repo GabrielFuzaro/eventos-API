@@ -51,6 +51,11 @@ public class ParticipanteController {
         return participanteAssembler.toOutput(participanteService.listarParticipantePorId(participanteId)); //Transforma o corpo do participante no corpo de output
     }
 
+    @GetMapping("/quantidade/{eventoId}")
+    public Long contarParticipantesPorEvento(@PathVariable Long eventoId) {
+        return participanteService.contarParticipantesEvento(eventoId);
+    }
+
     @GetMapping("/evento/{eventoId}") //Método para listar participantes de um respectivo evento só que com paginação
     public Page<ParticipanteOutput> listarParticipantesDoEvento(@PathVariable Long eventoId, Pageable pageable){ //PathVariable declara que a respectiva variavel é a que altera a URL
         return participanteAssembler.toCollectorsOutput(participanteService.buscarParticipantesDoEvento(eventoId, pageable)); //Transforma o corpo de cada participante para o formato de output
