@@ -36,6 +36,20 @@ public interface EventoRepository extends JpaRepository<Evento, Long>{ //o JPA f
         @Param ("dataFinal") OffsetDateTime dataFinal
     );
 
+    @Query ("SELECT e FROM Evento e " +  //Filtros combinados: cada filtro nulo é ignorado
+        "WHERE (:nome IS NULL OR LOWER(e.nome) LIKE LOWER(CONCAT('%', :nome, '%'))) " +
+        "AND (:status IS NULL OR e.status = :status) " +
+        "AND (:dataInicial IS NULL OR e.data_evento >= :dataInicial) " +
+        "AND (:dataFinal IS NULL OR e.data_evento <= :dataFinal)")
+
+    Page<Evento> buscarComFiltros(
+        @Param("nome") String nome,
+        @Param("status") StatusEvento status,
+        @Param("dataInicial") OffsetDateTime dataInicial,
+        @Param("dataFinal") OffsetDateTime dataFinal,
+        Pageable pageable
+    );
+
     @Query ("SELECT count(e) from Evento e " +
         "Where e.status = :status"
     )

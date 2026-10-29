@@ -50,9 +50,14 @@ public class EventoController {
         return eventoAssembler.toOutput(crudEventoService.buscarUnicoEvento(eventoId)); //Pega o evento inteiro e manda para Output
     }
 
-    @GetMapping      //Lista todos os eventos fazendo paginação      
-    public Page<EventoOutput> listarEventosPaginacao(Pageable pageable){
-        return eventoAssembler.toCollectionOutput(crudEventoService.listarEventosPaginacao(pageable)); //Pega todos os eventos da lista e muda para o formato de Output
+    @GetMapping      //Lista os eventos com paginação, aplicando os filtros opcionais (nome, status e período)
+    public Page<EventoOutput> listarEventosPaginacao(
+        Pageable pageable,
+        @RequestParam(required = false) String nome,
+        @RequestParam(required = false) StatusEvento status,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dataInicial,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dataFinal){
+        return eventoAssembler.toCollectionOutput(crudEventoService.buscarComFiltros(nome, status, dataInicial, dataFinal, pageable)); //Pega os eventos filtrados e muda para o formato de Output
     }
 
     @GetMapping("/filtro/{statusEvento}")

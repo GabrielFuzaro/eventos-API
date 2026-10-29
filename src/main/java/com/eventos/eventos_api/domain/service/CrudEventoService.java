@@ -49,6 +49,14 @@ public class CrudEventoService {
     public Page<Evento> listarEventosPaginacao(Pageable pageable) { //Busca todos os eventos mas como paginação
         return eventoRepository.findAll(pageable);
     }
+
+    public Page<Evento> buscarComFiltros(String nome, StatusEvento status, OffsetDateTime dataInicial, OffsetDateTime dataFinal, Pageable pageable) { //Busca paginada combinando os filtros informados
+        if (dataInicial != null && dataFinal != null && dataInicial.isAfter(dataFinal)) {
+            throw new NegocioException("A data inicial não pode ser depois da data final!");
+        }
+        String nomeFiltro = (nome == null || nome.trim().isEmpty()) ? null : nome.trim();
+        return eventoRepository.buscarComFiltros(nomeFiltro, status, dataInicial, dataFinal, pageable);
+    }
     
     @Transactional
     public Evento cadastrar(EventoInput input){       //Cadastra um evento através de um Input de evento
