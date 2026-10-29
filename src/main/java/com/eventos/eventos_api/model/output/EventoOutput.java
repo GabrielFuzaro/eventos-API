@@ -16,4 +16,6 @@ public class EventoOutput {            //Declara o formato do corpo da saída de
     private String local;
     private int capacidade_maxima;
     private StatusEvento status;
+    private Long categoriaId;      //ModelMapper preenche a partir de evento.categoria.id
+    private String categoriaNome;  //ModelMapper preenche a partir de evento.categoria.nome
 }
