@@ -33,10 +33,6 @@ Variáveis de ambiente (todas, exceto `JWT_SECRET`, têm padrão para desenvolvi
 | `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` | MySQL local, `root`, vazia | Conexão com o banco                 |
 | `ADMIN_USERNAME` / `ADMIN_SENHA` | `admin` / `123456` | Admin criado na primeira subida. **Troque fora do ambiente local** |
 | `SHOW_SQL`              | `false`                   | Loga o SQL gerado pelo Hibernate                       |
-| `EMAIL_HOST` / `EMAIL_PORTA` | vazio / `587`         | Servidor SMTP. Sem `EMAIL_HOST`, nenhum email é enviado |
-| `EMAIL_USUARIO` / `EMAIL_SENHA` | vazios             | Login no SMTP (ex.: senha de app do Gmail)             |
-| `EMAIL_REMETENTE` / `EMAIL_NOME_REMETENTE` | `EMAIL_USUARIO` / `Equipe de Eventos` | Remetente dos emails |
-| `EMAIL_AUTH` / `EMAIL_STARTTLS` | `true` / `true`     | Autenticação e TLS do SMTP                             |
 
 Nunca coloque valores reais desses segredos no `application.properties` nem em commits.
 
@@ -158,18 +154,6 @@ com.eventos.eventos_api
 - Somente `ADMIN` remove pessoas da fila.
 - Ao excluir o evento, a fila dele é apagada antes.
 - Nenhuma notificação é enviada a quem é promovido.
-
-### Emails
-- A API envia emails **apenas informativos**, em português e com linguagem cordial, para o email da inscrição:
-  - `INSCRICAO_CONFIRMADA`: inscrição feita no evento;
-  - `ENTRADA_LISTA_ESPERA`: entrou na fila, com a posição;
-  - `VAGA_LIBERADA`: saiu da fila e virou participante.
-- Só são enviados para **ações novas**. Nunca faça envio em massa para quem já estava cadastrado.
-- Os services publicam `NotificacaoEmailEvent` (só dados simples, nunca entidade JPA). O `EmailService` envia com
-  `@Async` + `@TransactionalEventListener`: só depois do commit e em segundo plano. Falha no SMTP **não** desfaz nem
-  atrasa a inscrição; vai só para o log, com o email mascarado.
-- Todo dado vindo do usuário (nome, evento, local) é escapado no HTML do email. Datas em horário de Brasília.
-- Sem `EMAIL_HOST` configurado, o envio fica desligado e o resto funciona normalmente.
 
 ### Categorias
 - Categorias base vêm da migration V007 (Palestra, Workshop, Show, Curso, Networking, Esporte).
