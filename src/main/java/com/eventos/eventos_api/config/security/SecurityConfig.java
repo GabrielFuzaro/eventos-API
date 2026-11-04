@@ -46,6 +46,8 @@ public class SecurityConfig {
                 .antMatchers(HttpMethod.PUT, "/eventos/**").hasRole("ADMIN")
                 .antMatchers(HttpMethod.POST, "/participantes/**").authenticated()
                 .antMatchers(HttpMethod.DELETE, "/participantes/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.POST, "/lista-espera/**").authenticated()
+                .antMatchers(HttpMethod.DELETE, "/lista-espera/**").hasRole("ADMIN")
                 .antMatchers(HttpMethod.DELETE, "/eventos/**").hasRole("ADMIN")
                 // O endpoint de login precisa ficar público (senão ninguém consegue logar)
                 .antMatchers("/auth/**").permitAll()

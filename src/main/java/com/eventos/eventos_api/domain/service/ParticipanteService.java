@@ -40,6 +40,7 @@ public class ParticipanteService {
     
     private ParticipanteRepository participanteRepository;
     private CrudEventoService crudEventoService;
+    private ListaEsperaService listaEsperaService;
 
     @Transactional
     public List<Participante> listarParticipantes(){  //Método para listar todos os participantes
@@ -71,12 +72,21 @@ public class ParticipanteService {
         Evento evento = crudEventoService.buscarUnicoEvento(input.getEventoId().getId());  //Busca o evento que o participante será cadastrado
         Participante participante = new Participante(); //Cria um participante novo com tudo vazio
 
-        if (evento.getStatus() == StatusEvento.LOTADO) {
-            throw new NegocioException("Esse evento já está lotado!"); //Verifica se o evento já está lotado para nao receber mais participantes
+        if (evento.jaOcorreu()) {
+            throw new NegocioException("Esse evento já ocorreu, não é possível se inscrever!"); //Não aceita inscrições em eventos encerrados/passados
+        }
+
+        if (evento.getStatus() == StatusEvento.LOTADO
+                || participanteRepository.countByEventoId(evento.getId()) >= evento.getCapacidade_maxima()) {
+            throw new NegocioException("Esse evento já está lotado! Entre na lista de espera."); //Evento lotado: a pessoa deve usar a lista de espera
         }
 
         if(participanteRepository.existsByEmailAndEventoId(input.getEmail(), evento.getId())){
             throw new NegocioException("Esse email já está inscrito nesse evento!");
+        }
+
+        if(listaEsperaService.estaNaLista(input.getEmail(), evento.getId())){
+            throw new NegocioException("Esse email já está na lista de espera desse evento!");
         }
 
         participante.setEvento(evento); //Passa o evento para o participante
@@ -104,11 +114,11 @@ public class ParticipanteService {
 
         Evento evento = participante.getEvento(); //pega o evento do evento do participante
 
-        participanteRepository.deleteById(participanteId); //exclui o participante pelo id
+        participanteRepository.delete(participante); //exclui o participante
 
-        if (evento.getStatus() == StatusEvento.LOTADO) {
-            evento.setStatus(StatusEvento.ABERTO); //Muda o status para aberto caso após a exclusão caso o evento esteja lotado
-        }
+        //Se o evento ainda não ocorreu, o primeiro da lista de espera assume a vaga liberada
+        //e o status do evento (ABERTO/LOTADO) é recalculado
+        listaEsperaService.preencherVagas(evento);
     }
 
     @Transactional

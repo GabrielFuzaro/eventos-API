@@ -28,6 +28,7 @@ public class CrudEventoService {
     private CategoriaService categoriaService;
     private CategoriaRepository categoriaRepository;
     private ParticipanteRepository participanteRepository;
+    private ListaEsperaService listaEsperaService;
 
     public List<Evento> buscarTodosEventos(){ //Busca todos os eventos
         return eventoRepository.findAll();
@@ -91,19 +92,18 @@ public class CrudEventoService {
         evento.setData_evento(input.getData_evento());
         evento.setCategoria(categoria);
 
-        long quantidadeDeParticipantes = participanteRepository.countByEventoId(eventoId); //Conta quantos participantes tem nesse respectivo evento
-
-        if(quantidadeDeParticipantes >= evento.getCapacidade_maxima()){
-            evento.setStatus(StatusEvento.LOTADO);
-        } else {                                                 //Muda o status do evento com base na quantidade de participantes
-            evento.setStatus(StatusEvento.ABERTO);
-        }
-
         if(evento.getData_evento().isBefore(OffsetDateTime.now())) {
             throw new NegocioException("Não é permitido salvar um evento com data no passado!"); //Pro[ibe eventos no passado
         }
 
-        return eventoRepository.save(evento); //Salva o resultado no banco
+        evento.setStatus(StatusEvento.ABERTO); //Data no futuro: o evento volta a aceitar inscrições, o status final é recalculado abaixo
+        Evento eventoSalvo = eventoRepository.save(evento); //Salva o resultado no banco
+
+        //Se a capacidade aumentou, as novas vagas são preenchidas pela lista de espera
+        //e o status é definido (LOTADO ou ABERTO) com base na quantidade de participantes
+        listaEsperaService.preencherVagas(eventoSalvo);
+
+        return eventoSalvo;
     }
 
 
@@ -119,6 +119,7 @@ public class CrudEventoService {
             throw new NegocioException("Não é possível excluir um evento que já possui participantes inscritos."); //Se tiver participantes cadastrados no evento, lança uma exception para nao permitir a exclusão
         }
         
+        listaEsperaService.limparDoEvento(eventoId); //Apaga a lista de espera do evento antes de excluí-lo
         eventoRepository.deleteById(eventoId); // Manda a requisição de delete
     }
 
