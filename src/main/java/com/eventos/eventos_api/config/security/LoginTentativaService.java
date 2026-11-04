@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.eventos.eventos_api.domain.exception.MuitasTentativasException;
@@ -18,6 +19,7 @@ public class LoginTentativaService { //Proteção contra força bruta: bloqueia 
 
     private static class Tentativas {
         int falhas;
+        Instant ultimaFalha;
         Instant bloqueadoAte;
     }
 
@@ -40,6 +42,7 @@ public class LoginTentativaService { //Proteção contra força bruta: bloqueia 
         tentativas.compute(chave(username, ip), (k, t) -> {
             Tentativas atual = t == null ? new Tentativas() : t;
             atual.falhas++;
+            atual.ultimaFalha = Instant.now();
             if (atual.falhas >= MAX_TENTATIVAS) {
                 atual.bloqueadoAte = Instant.now().plus(BLOQUEIO);
                 atual.falhas = 0;
@@ -50,6 +53,19 @@ public class LoginTentativaService { //Proteção contra força bruta: bloqueia 
 
     public void registrarSucesso(String username, String ip) {
         tentativas.remove(chave(username, ip));
+    }
+
+    //Remove registros antigos para o mapa não crescer sem limite (ex.: tentativas com muitos usuários diferentes).
+    //Falhas sem bloqueio "esquecem" depois do mesmo tempo do bloqueio
+    @Scheduled(fixedRate = 300000)
+    public void limparRegistrosAntigos() {
+        Instant agora = Instant.now();
+        tentativas.entrySet().removeIf(e -> {
+            Tentativas t = e.getValue();
+            boolean bloqueioAtivo = t.bloqueadoAte != null && agora.isBefore(t.bloqueadoAte);
+            boolean falhaRecente = t.ultimaFalha != null && agora.isBefore(t.ultimaFalha.plus(BLOQUEIO));
+            return !bloqueioAtivo && !falhaRecente;
+        });
     }
 
     private String chave(String username, String ip) {
