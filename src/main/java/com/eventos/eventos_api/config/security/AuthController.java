@@ -1,14 +1,21 @@
 package com.eventos.eventos_api.config.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.eventos.eventos_api.assembler.UsuarioAssembler;
@@ -17,59 +24,75 @@ import com.eventos.eventos_api.domain.model.Usuario;
 import com.eventos.eventos_api.domain.repository.UsuarioRepository;
 import com.eventos.eventos_api.model.output.UsuarioOutput;
 
+import lombok.AllArgsConstructor;
+
 @RestController
+@AllArgsConstructor
 @RequestMapping("/auth")
 public class AuthController {
-    
-    @Autowired
+
     private AuthenticationManager authenticationManager;
-
-    @Autowired
     private UsuarioRepository usuarioRepository;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
     private TokenService tokenService;
-
-    @Autowired 
     private UsuarioAssembler usuarioAssembler;
+    private LoginTentativaService loginTentativaService;
 
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
+    @PostMapping("/login") //Autentica e devolve o token num cookie HttpOnly; o corpo traz só os dados do usuário
+    public ResponseEntity<UsuarioOutput> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        String ip = httpRequest.getRemoteAddr();
+        loginTentativaService.verificarBloqueio(request.getUsername(), ip);
 
-        // Isso dispara a checagem de usuário/senha usando o UserDetailsService configurado.
-        // Se a senha estiver errada, uma exceção é lançada automaticamente pelo Spring Security
-        // (capturada pelo seu ApiExceptionHandler global, retornando 401/403)
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+        } catch (AuthenticationException e) {
+            loginTentativaService.registrarFalha(request.getUsername(), ip);
+            throw e; //ApiExceptionHandler responde 401 com mensagem genérica (não revela se o usuário existe)
+        }
+        loginTentativaService.registrarSucesso(request.getUsername(), ip);
 
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+        Usuario usuario = buscarUsuario(authentication.getName());
+        String token = tokenService.gerarToken(usuario.getUsername(), usuario.getRole());
 
-        String role = authentication.getAuthorities()
-            .iterator()
-            .next()
-            .getAuthority()
-            .replace("ROLE_", "");
-
-        String token = tokenService.gerarToken(request.getUsername(), role);
-
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, tokenService.criarCookie(token).toString())
+            .body(usuarioAssembler.toOutput(usuario));
     }
 
-     @PostMapping("/cadastro")
-    public UsuarioOutput cadastro(@RequestBody CadastroRequest request) {
+    @PostMapping("/logout") //Apaga o cookie do token
+    public ResponseEntity<Void> logout() {
+        return ResponseEntity.noContent()
+            .header(HttpHeaders.SET_COOKIE, tokenService.limparCookie().toString())
+            .build();
+    }
 
-        if (usuarioRepository.existsByUsername(request.getUsername())) {
+    @GetMapping("/me") //Usuário logado (o front não consegue ler o cookie HttpOnly, então pergunta aqui)
+    public UsuarioOutput usuarioLogado(Authentication authentication) {
+        return usuarioAssembler.toOutput(buscarUsuario(authentication.getName()));
+    }
+
+    @PostMapping("/cadastro")
+    @ResponseStatus(HttpStatus.CREATED)
+    public UsuarioOutput cadastro(@Valid @RequestBody CadastroRequest request) {
+
+        String username = request.getUsername().trim();
+
+        if (usuarioRepository.existsByUsername(username)) {
             throw new NegocioException("Já existe um usuário com esse nome");
         }
 
         Usuario usuario = new Usuario();
-        usuario.setUsername(request.getUsername());
+        usuario.setUsername(username);
         usuario.setSenha(passwordEncoder.encode(request.getSenha()));
-        usuario.setRole("USER");
+        usuario.setRole("USER"); //Cadastro público sempre cria USER, nunca ADMIN
 
-        Usuario salvo = usuarioRepository.save(usuario);
+        return usuarioAssembler.toOutput(usuarioRepository.save(usuario));
+    }
 
-        return usuarioAssembler.toOutput(salvo);
+    private Usuario buscarUsuario(String username) {
+        return usuarioRepository.findByUsername(username)
+            .orElseThrow(() -> new NegocioException("Usuário não encontrado"));
     }
 }

@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.eventos.eventos_api.model.output.ParticipanteOutput;
 import com.eventos.eventos_api.assembler.ParticipanteAssembler;
 import com.eventos.eventos_api.model.input.ParticipanteInput;
+import com.eventos.eventos_api.common.Privacidade;
 
-import javax.print.attribute.standard.Media;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -58,7 +58,11 @@ public class ParticipanteController {
 
     @GetMapping("/evento/{eventoId}") //Método para listar participantes de um respectivo evento só que com paginação
     public Page<ParticipanteOutput> listarParticipantesDoEvento(@PathVariable Long eventoId, Pageable pageable){ //PathVariable declara que a respectiva variavel é a que altera a URL
-        return participanteAssembler.toCollectorsOutput(participanteService.buscarParticipantesDoEvento(eventoId, pageable)); //Transforma o corpo de cada participante para o formato de output
+        Page<ParticipanteOutput> participantes = participanteAssembler.toCollectorsOutput(participanteService.buscarParticipantesDoEvento(eventoId, pageable)); //Transforma o corpo de cada participante para o formato de output
+        if (!Privacidade.usuarioAtualEhAdmin()) {
+            participantes.forEach(p -> p.setEmail(Privacidade.mascararEmail(p.getEmail()))); //USER vê o email mascarado
+        }
+        return participantes;
     }
 
 

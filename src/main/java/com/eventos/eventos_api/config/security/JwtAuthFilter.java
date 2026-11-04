@@ -12,11 +12,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
-public class JwtAuthFilter extends OncePerRequestFilter {
+public class JwtAuthFilter extends OncePerRequestFilter { //Autentica a requisição a partir do JWT (cookie ou header)
 
     @Autowired
     private TokenService tokenService;
@@ -31,29 +33,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain chain)
             throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+        String token = tokenService.extrairToken(request);
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            String token = authHeader.substring(7);
+            String username = tokenService.validarEExtrairUsername(token);
 
-            if (tokenService.tokenValido(token)) {
+            if (username != null) {
+                try {
+                    //Busca o usuário no banco a cada requisição: o papel (role) vem sempre atualizado
+                    //e um usuário excluído deixa de ter acesso mesmo com token ainda válido
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                String username = tokenService.extrairUsername(token);
+                    UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                UserDetails userDetails =
-                        userDetailsService.loadUserByUsername(username);
-
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-
-                SecurityContextHolder
-                        .getContext()
-                        .setAuthentication(auth);
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                } catch (UsernameNotFoundException e) {
+                    //Usuário não existe mais: segue como anônimo (rotas protegidas respondem 401)
+                }
             }
         }
 
