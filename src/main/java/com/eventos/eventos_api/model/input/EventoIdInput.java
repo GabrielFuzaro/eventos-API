@@ -9,6 +9,6 @@ import lombok.Setter;
 @Setter //gera os sets
 public class EventoIdInput {   //Input de ID do evento
     
-    @NotNull
+    @NotNull(message = "Informe o evento")
     private Long id;
 }

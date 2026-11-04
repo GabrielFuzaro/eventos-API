@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.eventos.eventos_api.assembler.ListaEsperaAssembler;
+import com.eventos.eventos_api.common.Privacidade;
 import com.eventos.eventos_api.domain.model.ListaEspera;
 import com.eventos.eventos_api.domain.service.ListaEsperaService;
 import com.eventos.eventos_api.model.input.ParticipanteInput;
@@ -36,7 +37,14 @@ public class ListaEsperaController {
         Page<ListaEspera> pagina = listaEsperaService.listarDoEvento(eventoId, pageable);
         long inicio = pagina.getPageable().isPaged() ? pagina.getPageable().getOffset() : 0;
         long[] posicao = { inicio };
-        return pagina.map(inscricao -> listaEsperaAssembler.toOutput(inscricao, ++posicao[0]));
+        boolean admin = Privacidade.usuarioAtualEhAdmin();
+        return pagina.map(inscricao -> {
+            ListaEsperaOutput output = listaEsperaAssembler.toOutput(inscricao, ++posicao[0]);
+            if (!admin) {
+                output.setEmail(Privacidade.mascararEmail(output.getEmail())); //USER vê o email mascarado
+            }
+            return output;
+        });
     }
 
     @GetMapping("/quantidade/{eventoId}") //Quantas pessoas estão na fila do evento

@@ -20,7 +20,21 @@ O front-end Angular que consome esta API fica no repositório `eventos-Front`.
 
 Para rodar é preciso:
 - MySQL em `localhost:3306` (banco `Eventos`, criado automaticamente; usuário `root`, sem senha).
-- Variável de ambiente `JWT_SECRET` com pelo menos 32 caracteres (HS256).
+- Variável de ambiente `JWT_SECRET` com pelo menos 32 caracteres (HS256). Sem ela a API não sobe.
+
+Variáveis de ambiente (todas, exceto `JWT_SECRET`, têm padrão para desenvolvimento local):
+
+| Variável                | Padrão                    | Uso                                                    |
+|-------------------------|---------------------------|--------------------------------------------------------|
+| `JWT_SECRET`            | (obrigatória)             | Chave de assinatura do JWT, mínimo 32 caracteres       |
+| `JWT_EXPIRACAO_MINUTOS` | `60`                      | Validade do token e do cookie                          |
+| `JWT_COOKIE_SEGURO`     | `false`                   | Flag `Secure` do cookie. **`true` em produção (HTTPS)**|
+| `CORS_ORIGENS`          | `http://localhost:4200`   | Origens do front permitidas, separadas por vírgula     |
+| `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` | MySQL local, `root`, vazia | Conexão com o banco                 |
+| `ADMIN_USERNAME` / `ADMIN_SENHA` | `admin` / `123456` | Admin criado na primeira subida. **Troque fora do ambiente local** |
+| `SHOW_SQL`              | `false`                   | Loga o SQL gerado pelo Hibernate                       |
+
+Nunca coloque valores reais desses segredos no `application.properties` nem em commits.
 
 ## Arquitetura (camadas)
 
@@ -67,20 +81,42 @@ com.eventos.eventos_api
 
 ### Segurança
 
-| Rota                         | Acesso                    |
-|------------------------------|---------------------------|
-| `/auth/**`                   | público (login/cadastro)  |
-| `GET /eventos/**`            | público                   |
-| `POST /eventos/**`           | autenticado               |
-| `PUT` / `DELETE /eventos/**` | `ADMIN`                   |
-| `POST /participantes/**`     | autenticado               |
-| `DELETE /participantes/**`   | `ADMIN`                   |
-| `POST /lista-espera/**`      | autenticado               |
-| `DELETE /lista-espera/**`    | `ADMIN`                   |
-| qualquer outra rota          | autenticado               |
+| Rota                                                    | Acesso       |
+|---------------------------------------------------------|--------------|
+| `POST /auth/login`, `/auth/logout`, `/auth/cadastro`    | público      |
+| `GET /auth/me`                                          | autenticado  |
+| `GET /eventos/**`                                       | público      |
+| `POST /eventos/**`                                      | autenticado  |
+| `PUT` / `DELETE /eventos/**`                            | `ADMIN`      |
+| `GET /participantes/evento/**`, `/participantes/quantidade/**` | autenticado (emails mascarados para `USER`) |
+| `GET /participantes`, `/participantes/{id}`, `/participantes/excel` | `ADMIN` |
+| `POST /participantes/**`                                | autenticado  |
+| `DELETE /participantes/**`                              | `ADMIN`      |
+| `GET /lista-espera/**`                                  | autenticado (emails mascarados para `USER`) |
+| `POST /lista-espera/**`                                 | autenticado  |
+| `DELETE /lista-espera/**`                               | `ADMIN`      |
+| qualquer outra rota                                     | autenticado  |
 
-Toda rota nova deve ser declarada em `SecurityConfig` com o nível de acesso correto.
-O CORS libera apenas `http://localhost:4200`.
+- Toda rota nova deve ser declarada em `SecurityConfig` com o nível de acesso correto. A primeira regra que casar vale,
+  então regras mais específicas vêm antes das genéricas.
+- **Token em cookie HttpOnly.** O login grava o JWT no cookie `eventos_token` (`HttpOnly`, `SameSite=Strict`, `Path=/`,
+  `Secure` quando `JWT_COOKIE_SEGURO=true`) e o corpo da resposta traz só `{ username, role }`. **Nunca devolva o token
+  no corpo** nem o guarde em `localStorage`/`sessionStorage` no front. O `JwtAuthFilter` lê o cookie e, como alternativa
+  para ferramentas como o Postman, o header `Authorization: Bearer`.
+- O JWT é assinado com HS256, tem emissor `eventos-api` e expira em `JWT_EXPIRACAO_MINUTOS`. O usuário e o papel são
+  buscados no banco a cada requisição (usuário excluído perde o acesso; mudança de papel vale na hora).
+- **CSRF:** desabilitado no Spring porque a API é stateless e o cookie é `SameSite=Strict`. O CORS só aceita as origens de
+  `CORS_ORIGENS` (nunca `*`, obrigatório com `allowCredentials`); requisições de outras origens recebem 403.
+- **Força bruta:** 5 senhas erradas para o mesmo usuário e IP bloqueiam o login por 15 minutos (HTTP 429,
+  `LoginTentativaService`, em memória).
+- Respostas 401/403 do Spring Security saem no formato `Problema`. Login errado responde sempre
+  "Usuário ou senha inválidos." (não revela se o usuário existe). Erros inesperados respondem 500 com mensagem genérica
+  e o detalhe vai só para o log.
+- Cabeçalhos de segurança: os padrões do Spring (`nosniff`, `X-Frame-Options: DENY`, cache-control) mais
+  `Content-Security-Policy: default-src 'none'` e `Referrer-Policy: no-referrer`.
+- **Dados pessoais:** para quem não é `ADMIN`, emails de participantes e da lista de espera saem mascarados
+  (`Privacidade.mascararEmail`). Lista completa e Excel só para `ADMIN`.
+- Todo `*Input` e request de autenticação tem Bean Validation com mensagens em português, e o controller usa `@Valid`.
 
 ## Regras de negócio
 
@@ -106,7 +142,7 @@ O CORS libera apenas `http://localhost:4200`.
 - Não é possível se inscrever em evento `LOTADO` (a pessoa deve usar a lista de espera)
   nem em evento que já ocorreu.
 - Somente `ADMIN` exclui participantes.
-- A exportação para Excel (`GET /participantes/excel?eventoId=`) inclui apenas participantes,
+- A exportação para Excel (`GET /participantes/excel?eventoId=`) é só para `ADMIN` e inclui apenas participantes,
   não a lista de espera.
 
 ### Lista de espera
@@ -125,9 +161,11 @@ O CORS libera apenas `http://localhost:4200`.
 
 ### Usuários e autenticação
 - Papéis: `ADMIN` e `USER`. `POST /auth/cadastro` sempre cria `USER`.
-- Na inicialização, o `DataInitializer` cria o usuário `admin` (senha `123456`) se não existir
-  (apenas para desenvolvimento).
-- `POST /auth/login` devolve um JWT (texto puro) com `sub` = username e claim `role`, válido por 1 hora.
+- Cadastro: usuário com 3 a 50 caracteres (letras, números, `.`, `-`, `_`) e senha com 8 a 100 caracteres.
+- Na inicialização, o `DataInitializer` cria o admin com `ADMIN_USERNAME`/`ADMIN_SENHA` se ele não existir.
+  O padrão `admin`/`123456` é só para desenvolvimento e gera um aviso no log.
+- `POST /auth/login` grava o JWT no cookie HttpOnly e devolve `{ username, role }`. `POST /auth/logout` apaga o cookie.
+  `GET /auth/me` devolve o usuário logado.
 - Senhas sempre com `BCryptPasswordEncoder`. Nunca devolva a senha em nenhum output.
 
 ## Regras de commit
