@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -44,13 +46,27 @@ public class EmailService { //Envia os emails informativos de inscrição, lista
         this.nomeRemetente = nomeRemetente;
     }
 
+    private boolean envioConfigurado() {
+        return StringUtils.hasText(host) && StringUtils.hasText(remetente);
+    }
+
+    @EventListener(ApplicationReadyEvent.class) //Avisa na subida da API se os emails vão ou não ser enviados
+    public void informarConfiguracao() {
+        if (envioConfigurado()) {
+            log.info("Envio de emails LIGADO: servidor {} com remetente {}", host, remetente);
+        } else {
+            log.warn("Envio de emails DESLIGADO: defina EMAIL_HOST, EMAIL_USUARIO e EMAIL_SENHA para enviar os emails de inscrição.");
+        }
+    }
+
     //Só depois do commit (se a inscrição falhar, ninguém recebe email) e em outra thread
     //(SMTP lento ou fora do ar não atrasa nem quebra a inscrição)
     @Async
     @TransactionalEventListener(fallbackExecution = true)
     public void aoNotificar(NotificacaoEmailEvent evento) {
-        if (!StringUtils.hasText(host) || !StringUtils.hasText(remetente)) {
-            log.debug("Envio de email desabilitado (EMAIL_HOST/EMAIL_REMETENTE não configurados)");
+        if (!envioConfigurado()) {
+            log.warn("Email '{}' para {} não enviado: envio de emails desligado (EMAIL_HOST/EMAIL_USUARIO não configurados)",
+                evento.getTipo(), Privacidade.mascararEmail(evento.getEmail()));
             return;
         }
 
