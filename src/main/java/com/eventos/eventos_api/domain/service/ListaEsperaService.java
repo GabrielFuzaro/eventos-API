@@ -22,6 +22,9 @@ import com.eventos.eventos_api.domain.repository.ListaEsperaRepository;
 import com.eventos.eventos_api.domain.repository.ParticipanteRepository;
 import com.eventos.eventos_api.model.input.ParticipanteInput;
 
+import org.springframework.context.ApplicationEventPublisher;
+import com.eventos.eventos_api.domain.event.NotificacaoEmailEvent;
+
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -33,6 +36,7 @@ public class ListaEsperaService { //Regras da lista de espera dos eventos
     private ListaEsperaRepository listaEsperaRepository;
     private ParticipanteRepository participanteRepository;
     private EventoRepository eventoRepository;
+    private ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public ListaEspera entrar(ParticipanteInput input) { //Coloca uma pessoa na fila de um evento lotado
@@ -66,7 +70,12 @@ public class ListaEsperaService { //Regras da lista de espera dos eventos
         inscricao.setEmail(input.getEmail());
         inscricao.setDataInscricao(OffsetDateTime.now());
 
-        return listaEsperaRepository.save(inscricao);
+        ListaEspera salva = listaEsperaRepository.save(inscricao);
+
+        //Email informando a posição na fila (enviado só depois do commit, em segundo plano)
+        eventPublisher.publishEvent(NotificacaoEmailEvent.entradaListaEspera(salva.getNome(), salva.getEmail(), evento, posicao(salva)));
+
+        return salva;
     }
 
     public long posicao(ListaEspera inscricao) { //Posição da inscrição na fila (1 = próximo a ser chamado)
@@ -126,6 +135,9 @@ public class ListaEsperaService { //Regras da lista de espera dos eventos
                 promovidos.add(participanteRepository.save(participante));
 
                 listaEsperaRepository.delete(inscricao); //E sai da fila
+
+                //Email avisando que a vaga foi confirmada
+                eventPublisher.publishEvent(NotificacaoEmailEvent.vagaLiberada(participante.getNome(), participante.getEmail(), evento));
                 inscritos++;
             }
         }
