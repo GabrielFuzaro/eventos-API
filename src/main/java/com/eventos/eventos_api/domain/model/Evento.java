@@ -52,6 +52,11 @@ public class Evento {
         return StatusEvento.ABERTO.equals(getStatus()) || StatusEvento.LOTADO.equals(getStatus());
     }
 
+    public boolean jaOcorreu() {           //Evento encerrado ou com data no passado: não aceita mais inscrições nem lista de espera
+        return StatusEvento.ENCERRADO.equals(getStatus())
+            || (getData_evento() != null && !getData_evento().isAfter(OffsetDateTime.now()));
+    }
+
     public void encerrar() {              //Método para encerrar evento
 
         if (!podeSerEncerrado()) {
