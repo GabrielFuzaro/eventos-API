@@ -32,6 +32,9 @@ import com.eventos.eventos_api.domain.repository.ParticipanteRepository;
 import com.eventos.eventos_api.model.input.ParticipanteInput;
 import com.eventos.eventos_api.model.output.ParticipanteOutput;
 
+import org.springframework.context.ApplicationEventPublisher;
+import com.eventos.eventos_api.domain.event.NotificacaoEmailEvent;
+
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor //Gera um constructor com todos os argumentos/variaveis
@@ -41,6 +44,7 @@ public class ParticipanteService {
     private ParticipanteRepository participanteRepository;
     private CrudEventoService crudEventoService;
     private ListaEsperaService listaEsperaService;
+    private ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public List<Participante> listarParticipantes(){  //Método para listar todos os participantes
@@ -94,6 +98,9 @@ public class ParticipanteService {
         participante.setEmail(input.getEmail()); //registra o email do particiipante atravéd do input
 
         Participante participanteSalvo = participanteRepository.save(participante); //Salva o participante no banco
+
+        //Email de confirmação (enviado só depois do commit, em segundo plano)
+        eventPublisher.publishEvent(NotificacaoEmailEvent.inscricaoConfirmada(participante.getNome(), participante.getEmail(), evento));
 
         long totalInscritos = participanteRepository.countByEventoId(evento.getId()); //Verifica quantos participantes estão cadastrados no evento
 
