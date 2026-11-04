@@ -136,7 +136,7 @@ public class ParticipanteService {
 
     public byte[] gerarExcel(List<Participante> participantes){
         if(participantes == null || participantes.isEmpty()){
-            throw new IllegalArgumentException("Nenhum participante para exportar");
+            throw new NegocioException("Esse evento não tem participantes para exportar!"); //400 com mensagem legível (antes era erro 500)
         }
 
         try(Workbook workbook = new XSSFWorkbook();
@@ -164,7 +164,7 @@ public class ParticipanteService {
             for (int col = 0; col<COLUNAS.length; col++){
                 linhaTitulo.createCell(col).setCellStyle(estiloTitulo);
             }
-            linhaTitulo.getCell(0).setCellValue("Relatório de Produtos");
+            linhaTitulo.getCell(0).setCellValue("Relatório de Participantes");
             sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, COLUNAS.length - 1));
 
             Font fonteCabecalho = workbook.createFont();
